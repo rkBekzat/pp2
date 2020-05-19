@@ -226,16 +226,10 @@ while running:
 
 
                 def intersec(x, y, w, a, b, c):
-                    if x <= a and a <= x + w and y <= b and b <= y + w:
-                        return 1
-                    if x <= a + c and a + c <= x + w and y <= b and b <= y + w:
-                        return 1
-                    if x <= a and a <= x + w and y <= b + c and b + c <= y + w:
-                        return 1
-                    if x <= a and a <= x + w and y <= b and b <= y + w:
-                        return 1
-                    if x <= a + c / 2 and a + c / 2 <= x + w and y <= b + c / 2 and b + c / 2 <= y + w:
-                        return 1
+                    for i in range(a, a + c + 1):
+                        for j in range(b, b + c + 1):
+                            if x <= i and i <= x + 30 and y <= j and j <= y + 30:
+                                return 1
                     return 0
                     
 
@@ -437,6 +431,7 @@ while running:
                     pygame.display.flip()
 
                 pygame.quit()
+                
             if event.key == pygame.K_2:
                 import json
                 from threading import Thread
@@ -767,6 +762,8 @@ while running:
                 event_client.start()
                 game_start()
 
+              
+
                   
 
             if event.key == pygame.K_3:
@@ -960,13 +957,13 @@ while running:
                     to_x = x
                     to_y = y
                     if direction == 'UP':
-                        to_y = to_y - 30
+                        to_y = to_y - 20
                     if direction == 'DOWN':
-                        to_y = to_y + 30
+                        to_y = to_y + 20
                     if direction == 'LEFT':
-                        to_x = to_x - 30
+                        to_x = to_x - 20
                     if direction == 'RIGHT':
-                        to_x = to_x + 30
+                        to_x = to_x + 20
                     if to_x <= bullet['x'] and bullet['x'] <= to_x + 30:
                         if to_y < bullet['y']:
                             if bullet['direction'] == 'UP':
@@ -977,24 +974,18 @@ while running:
 
                     if to_y <= bullet['y'] and bullet['y'] <= to_y + 30:
                         if to_x < bullet['x']:
-                            if bullet['direction'] == 'RIGHT':
+                            if bullet['direction'] == 'LEFT':
                                 return 0
                         else:
-                            if bullet['direction'] == 'LEFT':
+                            if bullet['direction'] == 'RIGHT':
                                 return 0
                     return 1  
 
                 def intersec(x, y, w, a, b, c):
-                    if x <= a and a <= x + w and y <= b and b <= y + w:
-                        return 1
-                    if x <= a + c and a + c <= x + w and y <= b and b <= y + w:
-                        return 1
-                    if x <= a and a <= x + w and y <= b + c and b + c <= y + w:
-                        return 1
-                    if x <= a and a <= x + w and y <= b and b <= y + w:
-                        return 1
-                    if x <= a + c / 2 and a + c / 2 <= x + w and y <= b + c / 2 and b + c / 2 <= y + w:
-                        return 1
+                    for i in range(a, a + c + 1):
+                        for j in range(b, b + c + 1):
+                            if x <= i and i <= x + 30 and y <= j and j <= y + 30:
+                                return 1
                     return 0
                     
 
@@ -1003,12 +994,16 @@ while running:
                     to_y = y
                     if direction == 'UP':
                         to_y = to_y - 40
+                        to_y = (to_y + 631) % 631
                     if direction == 'DOWN':
                         to_y = to_y + 40
+                        to_y = to_y % 631
                     if direction == 'LEFT':
                         to_x = to_x - 40
+                        to_x = (to_x + 631) % 631
                     if direction == 'RIGHT':
                         to_x = to_x + 40
+                        to_x = to_x % 631
                     if intersec(to_x, to_y, 40, int(tanchik['x']), int(tanchik['y']), 40):
                         return 0
                     return 1
@@ -1022,7 +1017,7 @@ while running:
                         if tank['id'] == client.tank_id:
                             my_tank = tank
                             ok = 1
-                    all_dir = list()
+                    all_dir = list()    
                     all_dir.append('DOWN')
                     all_dir.append('UP')
                     all_dir.append('LEFT')
@@ -1031,23 +1026,23 @@ while running:
                         ok = 1
                         for bullet in bullets:
                             if bullet['owner'] != my_tank['id']:
-                                if calc(my_tank['x'], my_tank['y'], my_tank['direction'], bullet):
+                                if calc(my_tank['x'], my_tank['y'], my_tank['direction'], bullet) == 0:
                                     ok = 0
                         for tank in tanks:
                             if my_tank != tank:
-                                if calc_tank(my_tank['x'], my_tank['y'], my_tank['direction'], tank):
+                                if calc_tank(my_tank['x'], my_tank['y'], my_tank['direction'], tank) == 1:
                                     ok = 0
                         if ok == 0:  
                             for direc in all_dir:
                                 ok = 1
                                 for bullet in bullets:
                                     if bullet['owner'] != my_tank['id']:
-                                        if calc(my_tank['x'], my_tank['y'], direc, bullet):
+                                        if calc(my_tank['x'], my_tank['y'], direc, bullet) == 0:
                                             ok = 0
                                 if ok:
                                     for tank in tanks:
                                         if my_tank != tank:
-                                            if calc_tank(my_tank['x'], my_tank['y'], direc, tank):
+                                            if calc_tank(my_tank['x'], my_tank['y'], direc, tank) == 1:
                                                 ok = 0
                                     if ok:
                                         client.turn_tank(client.token, direc)
@@ -1065,26 +1060,40 @@ while running:
                     if ok :
                         for tank in tanks:
                             if tank != my_tank:
-                                if my_tank['x'] + 15 >= tank['x'] and my_tank['x'] + 15 <= tank['x'] + 30:
+
+                                if my_tank['x'] + 15 >= tank['x'] and my_tank['x'] + 15 <= tank['x'] + 30 and abs(my_tank['y'] - tank['y']) < 600:
                                     if my_tank['y'] < tank['y']:
-                                        if calc_tank(my_tank['x'], my_tank['y'], 'DOWN', tank):
+                                        if calc_tank(my_tank['x'], my_tank['y'], 'DOWN', tank) == 1:
                                             client.turn_tank(client.token, 'DOWN')
                                             client.fire_bullet(client.token)
-                                    else:
-                                        if calc_tank(my_tank['x'], my_tank['y'], 'UP', tank):
+                                        else:
                                             client.turn_tank(client.token, 'UP')
                                             client.fire_bullet(client.token)
+                                    else:
+                                        if calc_tank(my_tank['x'], my_tank['y'], 'UP', tank) == 1:
+                                            client.turn_tank(client.token, 'UP')
+                                            client.fire_bullet(client.token)
+                                        else:
+                                            client.turn_tank(client.token, 'DOWN')
+                                            client.fire_bullet(client.token)
 
-                                if my_tank['y'] + 15 >= tank['y'] and my_tank['y'] + 15 <= tank['y'] + 30:
+
+                                if my_tank['y'] + 15 >= tank['y'] and my_tank['y'] + 15 <= tank['y'] + 30 and abs(my_tank['x'] - tank['x']) < 600:
                                     if my_tank['x'] < tank['x']:
-                                        if calc_tank(my_tank['x'], my_tank['y'], 'RIGHT', tank):
+                                        if calc_tank(my_tank['x'], my_tank['y'], 'RIGHT', tank) == 1:
                                             client.turn_tank(client.token, 'RIGHT')
                                             client.fire_bullet(client.token)
-                                    else:
-                                        if calc_tank(my_tank['x'], my_tank['y'], 'LEFT', tank):
+                                        else:
                                             client.turn_tank(client.token, 'LEFT')
                                             client.fire_bullet(client.token)
-
+                                            
+                                    else:
+                                        if calc_tank(my_tank['x'], my_tank['y'], 'LEFT', tank) == 1:
+                                            client.turn_tank(client.token, 'LEFT')
+                                            client.fire_bullet(client.token)
+                                        else:
+                                            client.turn_tank(client.token, 'RIGHT')
+                                            client.fire_bullet(client.token)
 
                 def game_start():
                     mainLoop = True
@@ -1102,6 +1111,7 @@ while running:
                         tanks = event_client.response['gameField']['tanks']
                         
                         screen.fill((0, 0, 0))
+                        
                         for win in winners:
                             if win['tankId'] == client.tank_id:
                                 gameover = 1
@@ -1150,7 +1160,6 @@ while running:
                             fire()
                             choose_dir()
                             try:
-                                print("OKAY")
                                 remaining_time = event_client.response['remainingTime']
                                 text = font.render('Remaining time: {}'.format(remaining_time), True, (255, 255, 255))
                                 textRect = text.get_rect()
@@ -1200,6 +1209,7 @@ while running:
                 event_client = TankConsumerClient('room-5')
                 event_client.start()
                 game_start()
+
 
     screen.blit(moon, (-150, 0))	
     text = font.render("Menu", True, (125, 125, 125))
