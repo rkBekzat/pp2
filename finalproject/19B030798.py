@@ -226,8 +226,8 @@ while running:
 
 
                 def intersec(x, y, w, a, b, c):
-                    for i in range(a, a + c + 1):
-                        for j in range(b, b + c + 1):
+                    for i in range(int(a), int(a + c + 1)):
+                        for j in range(int(b), int(b + c + 1)):
                             if x <= i and i <= x + 30 and y <= j and j <= y + 30:
                                 return 1
                     return 0
@@ -238,7 +238,6 @@ while running:
                 q = random.randint(2, 6)
                 while mainloop:
                     mills = clock.tick(FPS)
-
                     if gameover == 1:
                         screen.fill((0,0,0))
                         screen.blit(win, (0, 0))
@@ -247,10 +246,10 @@ while running:
                         screen.blit(string, (200, 200))
                         screen.blit(cont, (150, 240))
 
-                        if res1 == 0:
+                        if res1 <= 0:
                             lst = font.render("Second Player win", True, (255, 0, 0))
                             screen.blit(lst, (200, 280))
-                        if res2 == 0:
+                        if res2 <= 0:
                             lst = font.render("First Player win", True, (255, 0, 0))
                             screen.blit(lst, (200, 280))
                         for event in pygame.event.get():
@@ -376,9 +375,18 @@ while running:
                                     tanks[1].change_speed(5)
                                     timer = 0
                                     q = random.randint(2, 6)
-                                    for wall in walls:
-                                        while  power == wall:
-                                            power.change(random.randint(0, 600), random.randint(0, 800))
+                                    pos = (random.randint(0, 800), random.randint(0, 600))
+                                    while True:
+                                        ok = 1
+                                        for wall in walls:
+                                            if intersec(wall.x, wall.y, 60, pos[0], pos[1], 40):
+                                                ok = 0
+                                                break
+                                        if ok:
+                                            break
+                                        else:
+                                            pos = (random.randint(0, 800), random.randint(0, 600))
+                                    power.change_pos(pos[0], pos[1])
                                 if cur > 700 and q == res1 + res2:
                                     q = random.randint(2, 6)
                             else:
@@ -418,7 +426,7 @@ while running:
                             screen.blit(Text1, (5, 5))
                             screen.blit(Text2, (600, 5))
                             
-                            if res1 == 0 or res2 == 0:  
+                            if res1 <= 0 or res2 <= 0:  
                                 pygame.mixer.music.play()
                                 gameover = 1        
                             for shot in shots:
